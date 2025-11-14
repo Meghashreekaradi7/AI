@@ -1,0 +1,95 @@
+import math
+
+# -----------------------------------------
+# Alpha–Beta Search (generic)
+# -----------------------------------------
+
+def alpha_beta_search(node, tree):
+    """
+    node: starting node id (string or int)
+    tree: dictionary storing children or leaf values
+    """
+    def max_value(n, alpha, beta):
+        if is_terminal(n, tree):
+            return utility(n, tree)
+
+        v = -math.inf
+        for child in tree[n]:
+            v = max(v, min_value(child, alpha, beta))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
+
+    def min_value(n, alpha, beta):
+        if is_terminal(n, tree):
+            return utility(n, tree)
+
+        v = math.inf
+        for child in tree[n]:
+            v = min(v, max_value(child, alpha, beta))
+            if v <= alpha:
+                return v
+            beta = min(beta, v)
+        return v
+
+    return max_value(node, -math.inf, math.inf)
+
+
+# -----------------------------------------
+# Helper functions for terminal nodes
+# -----------------------------------------
+
+def is_terminal(node, tree):
+    return isinstance(tree[node], int)
+
+def utility(node, tree):
+    return tree[node]
+
+
+# -----------------------------------------
+# USER INPUT FOR TREE
+# -----------------------------------------
+
+def get_tree_from_user():
+    tree = {}
+    print("\nEnter nodes and children.")
+    print("Format for NON-terminal: A B C D  (A has children B,C,D)")
+    print("Format for TERMINAL: A 5  (A has value 5)")
+    print("Type 'done' when finished.\n")
+
+    while True:
+        line = input("Enter node: ").strip()
+        if line.lower() == "done":
+            break
+
+        parts = line.split()
+
+        # Terminal leaf: A 5
+        if len(parts) == 2 and parts[1].lstrip("-").isdigit():
+            node = parts[0]
+            value = int(parts[1])
+            tree[node] = value
+
+        # Non-terminal: A B C D
+        else:
+            node = parts[0]
+            children = parts[1:]
+            tree[node] = children
+
+    return tree
+
+
+# -----------------------------------------
+# MAIN PROGRAM
+# -----------------------------------------
+
+print("=== Alpha–Beta Search ===")
+tree = get_tree_from_user()
+
+root = input("Enter root node: ").strip()
+
+print("\nRunning alpha–beta search...\n")
+value = alpha_beta_search(root, tree)
+
+print(f"Best minimax value from root {root}: {value}")
